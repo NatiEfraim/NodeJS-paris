@@ -31,7 +31,7 @@ app.get('/api/room-exists/:roomId',(req,res)=>{
             return res.send({roomExists:true,full:true});
           
         }else {
-            return    res.send({roomExists:true,full:false});//the use can connection
+            return res.send({roomExists:true,full:false});//the use can connection
         }
            
 
@@ -70,9 +70,9 @@ io.on("connection", (socket) => {
       disconnectHandler(socket);
     });
   
-    // socket.on("conn-signal", (data) => {
-    //   signalingHandler(data, socket);
-    // });
+    socket.on("conn-signal", (data) => {
+      signalingHandler(data, socket);
+    });
   
     // socket.on("conn-init", (data) => {
     //   initializeConnectionHandler(data, socket);
@@ -150,16 +150,16 @@ const createNewRoomHandler = (data, socket) => {
     connectedUsers = [...connectedUsers, newUser];
     // send emity to roomId users
     io.to(roomId).emit("room-update", { connectedUsers: room.connectedUsers });
-    // // emit to all users which are already in this room to prepare peer connection
-    // room.connectedUsers.forEach((user) => {
-    //   if (user.socketId !== socket.id) {
-    //     const data = {
-    //       connUserSocketId: socket.id,
-    //     };
-  
-    //     io.to(user.socketId).emit("conn-prepare", data);
-    //   }
-    // });
+    // emit to all users which are already in this room to prepare peer connection
+    room.connectedUsers.forEach((user) => {
+      if (user.socketId !== socket.id) {
+        const data = {
+          connUserSocketId: socket.id,
+        };
+        //?outcoming prepare msg
+        io.to(user.socketId).emit("conn-prepare", data);
+      }
+    });
   
   };
   
@@ -193,4 +193,12 @@ const createNewRoomHandler = (data, socket) => {
       }
 
     }
+  };
+
+  const signalingHandler = (data, socket) => {
+    const { connUserSocketId, signal } = data;
+  
+    const signalingData = { signal, connUserSocketId: socket.id };
+    //?send event to the client
+    io.to(connUserSocketId).emit("conn-signal", signalingData);
   };
