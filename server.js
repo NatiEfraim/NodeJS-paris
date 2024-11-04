@@ -28,14 +28,18 @@ app.get('/api/room-exists/:roomId',(req,res)=>{
         //send jsom the room is exist
         if (room.connectedUsers.length>3) {
             //the room is full
-            res.send({roomExists:true,full:true});
+            return res.send({roomExists:true,full:true});
+          
+        }else {
+            return    res.send({roomExists:true,full:false});//the use can connection
         }
-              //the use can connection
-              res.send({roomExists:true,full:false});
+           
 
-    }
+    }else{
             //send jsom the room is not exist
-            res.send({roomExists:false,full:false});
+            return res.send({roomExists:false,full:false});
+    }
+
 
 
 });
@@ -62,9 +66,9 @@ io.on("connection", (socket) => {
       joinRoomHandler(data, socket);
     });
   
-    // socket.on("disconnect", () => {
-    //   disconnectHandler(socket);
-    // });
+    socket.on("disconnect", () => {
+      disconnectHandler(socket);
+    });
   
     // socket.on("conn-signal", (data) => {
     //   signalingHandler(data, socket);
