@@ -52,7 +52,7 @@ const io = require('socket.io')(server, {
 });
 
 
-// socket.io handlers
+// socket.io handlers - events that recived
 
 io.on("connection", (socket) => {
     console.log(`user connected ${socket.id}`);
@@ -74,9 +74,9 @@ io.on("connection", (socket) => {
       signalingHandler(data, socket);
     });
   
-    // socket.on("conn-init", (data) => {
-    //   initializeConnectionHandler(data, socket);
-    // });
+    socket.on("conn-init", (data) => {
+      initializeConnectionHandler(data, socket);
+    });
   
     // socket.on("direct-message", (data) => {
     //   directMessageHandler(data, socket);
@@ -85,9 +85,7 @@ io.on("connection", (socket) => {
   
 
 
-server.listen(PORT, () => {
-    console.log(`Server is listening on ${PORT}`);
-})
+
 
 
 ///Handler function 
@@ -196,9 +194,23 @@ const createNewRoomHandler = (data, socket) => {
   };
 
   const signalingHandler = (data, socket) => {
+    //destruct parameters 
     const { connUserSocketId, signal } = data;
-  
+    //prepare obj
     const signalingData = { signal, connUserSocketId: socket.id };
     //?send event to the client
     io.to(connUserSocketId).emit("conn-signal", signalingData);
   };
+
+  // information from clients which are already in room that They have preapred for incoming connection
+const initializeConnectionHandler = (data, socket) => {
+    //destruct parameters
+    const { connUserSocketId } = data;
+    //prepare obj
+    const initData = { connUserSocketId: socket.id };
+    io.to(connUserSocketId).emit("conn-init", initData);
+  };
+
+  server.listen(PORT, () => {
+    console.log(`Server is listening on ${PORT}`);
+})
