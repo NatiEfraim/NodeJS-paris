@@ -179,7 +179,7 @@ const createNewRoomHandler = (data, socket) => {
           // close the room if amount of the users which will stay in room will be 0
     if (room.connectedUsers.length > 0) {
         // emit to all users which are still in the room that user disconnected
-        // io.to(room.id).emit("user-disconnected", { socketId: socket.id });
+        io.to(room.id).emit("user-disconnected", { socketId: socket.id });
   
         // emit an event to rest of the users which left in the toom new connectedUsers in room
         io.to(room.id).emit("room-update", {
